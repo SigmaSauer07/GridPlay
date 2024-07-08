@@ -1,1 +1,1 @@
-Sports bettomg web app
+Sports betting web app

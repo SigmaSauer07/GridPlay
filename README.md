@@ -1,1 +1,1 @@
-Sports betting web app
+A web app for sports betting

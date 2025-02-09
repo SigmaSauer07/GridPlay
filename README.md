@@ -73,3 +73,50 @@ Tired of messy spreadsheets, cash piles, and manual score-checking for your spor
 - **APIs**: Live scores via ESPN/SportsRadar.
 - **Security**: End-to-end encryption, GDPR compliance.
 - **Scalability**: Handles 10,000+ concurrent users.
+
+## Setup Instructions
+
+### Prerequisites
+- Node.js
+- npm or yarn
+- Supabase account
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/GridPlay.git
+   cd GridPlay
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. Set up Supabase:
+   - Create a new project on [Supabase](https://supabase.io/).
+   - Copy the API URL and public anon key from your Supabase project settings.
+
+4. Create a `.env.local` file in the root directory and add your Supabase credentials:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+5. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+6. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Deployment
+
+You can deploy the app to Vercel with one click:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/yourusername/GridPlay)

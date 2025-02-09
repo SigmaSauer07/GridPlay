@@ -13,4 +13,9 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 
-export default eslintConfig;
+export default {
+  extends: ['next', 'prettier'],
+  rules: {
+    // Add your custom rules here
+  },
+};

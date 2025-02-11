@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GridPlay - Sports Squares Reinvented</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+            margin: 20px 0;
+        }
+
+        .auth-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .game-setup {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-group {
+            margin-bottom: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #333;
+            color: white;
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button {
+            background: #00ff88;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        #gameDropdown {
+            display: none;
+        }
+
+        .create-button {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-buttons">
+        <button onclick="showAuth('signup')">Sign Up</button>
+        <button onclick="showAuth('login')">Login</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>GridPlay</h1>
+            <p>Your Grid. Their Game. Instant Glory.</p>
+        </div>
+
+        <div class="game-setup">
+            <div class="dropdown-group">
+                <select id="sportSelect" onchange="toggleGameDropdown()">
+                    <option value="default">What Sport?</option>
+                    <option value="nfl">NFL</option>
+                    <option value="nba">NBA</option>
+                </select>
+            </div>
+
+            <div class="dropdown-group">
+                <select id="gameDropdown">
+                    <option value="">What Game?</option>
+                </select>
+            </div>
+
+            <div class="dropdown-group">
+                <select id="boardType">
+                    <option value="">Choose Your Board</option>
+                    <option value="shotgun">Shotgun Board</option>
+                    <option value="5x5">5x5 Grid</option>
+                    <option value="10x10">10x10 Grid</option>
+                </select>
+            </div>
+
+            <div class="dropdown-group">
+                <select id="squarePrice">
+                    <option value="">Square Price</option>
+                    <option value="1">$1 per square</option>
+                    <option value="5">$5 per square</option>
+                    <option value="10">$10 per square</option>
+                </select>
+            </div>
+
+            <div class="create-button">
+                <button onclick="createBoard()">Create Board</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleGameDropdown() {
+            const sportSelect = document.getElementById('sportSelect');
+            const gameDropdown = document.getElementById('gameDropdown');
+            
+            if (sportSelect.value !== 'default') {
+                gameDropdown.style.display = 'block';
+                // Populate games based on selected sport
+                const games = {
+                    nfl: ['NFL Game 1: Team A vs Team B', 'NFL Game 2: Team C vs Team D'],
+                    nba: ['NBA Game 1: Team X vs Team Y', 'NBA Game 2: Team Z vs Team W']
+                };
+                
+                gameDropdown.innerHTML = '<option value="">What Game?</option>';
+                games[sportSelect.value].forEach(game => {
+                    gameDropdown.innerHTML += `<option value="${game}">${game}</option>`;
+                });
+            } else {
+                gameDropdown.style.display = 'none';
+            }
+        }
+
+        function showAuth(type) {
+            alert(`${type.charAt(0).toUpperCase() + type.slice(1)} form coming soon!`);
+        }
+
+        function createBoard() {
+            const sport = document.getElementById('sportSelect').value;
+            const game = document.getElementById('gameDropdown').value;
+            const boardType = document.getElementById('boardType').value;
+            const price = document.getElementById('squarePrice').value;
+
+            if (!sport || !game || !boardType || !price) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            alert(`Creating ${boardType} board for ${game} at $${price} per square!`);
+            // Add actual board creation logic here
+        }
+    </script>
+</body>
+</html>

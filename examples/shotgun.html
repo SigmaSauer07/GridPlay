@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shotgun Board - Sports Betting Made Easy</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #e74c3c;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .team-names {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .board-row {
+            display: flex;
+            gap: 5px;
+        }
+
+        .row-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .square-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .random-number {
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .square {
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .square:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .square.selected {
+            background-color: var(--secondary-color);
+            color: #fff;
+        }
+
+        .square .number {
+            font-size: 1.5em;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .winner {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shotgun Board</h1>
+        <div class="team-names">Team A vs Team B</div>
+        <div class="board-container" id="board"></div>
+        <div class="controls">
+            <select id="game-select">
+                <option value="1">$1 per square</option>
+                <option value="5">$5 per square</option>
+            </select>
+            <button id="start-game">Start Game</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const startButton = document.getElementById('start-game');
+        const gameSelect = document.getElementById('game-select');
+        const resultDiv = document.getElementById('result');
+        let selectedSquares = [];
+
+        function createBoard() {
+            board.innerHTML = '';
+            for (let i = 0; i < 2; i++) {
+                const rowContainer = document.createElement('div');
+                rowContainer.classList.add('row-container');
+
+                const rowLabel = document.createElement('div');
+                rowLabel.classList.add('row-label');
+                rowLabel.textContent = i === 0 ? 'Halftime' : 'Final';
+                rowContainer.appendChild(rowLabel);
+
+                const row = document.createElement('div');
+                row.classList.add('board-row');
+                for (let j = 0; j < 10; j++) {
+                    const squareWrapper = document.createElement('div');
+                    squareWrapper.classList.add('square-wrapper');
+
+                    const randomNumber = document.createElement('div');
+                    randomNumber.classList.add('random-number');
+                    squareWrapper.appendChild(randomNumber);
+
+                    const square = document.createElement('div');
+                    square.classList.add('square');
+                    square.innerHTML = '<span class="number"></span>';
+                    square.addEventListener('click', () => toggleSelection(square, i * 10 + j));
+                    squareWrapper.appendChild(square);
+
+                    row.appendChild(squareWrapper);
+                }
+                rowContainer.appendChild(row);
+                board.appendChild(rowContainer);
+            }
+        }
+
+        function toggleSelection(square, index) {
+            square.classList.toggle('selected');
+            const position = selectedSquares.indexOf(index);
+            if (position > -1) {
+                selectedSquares.splice(position, 1);
+            } else {
+                selectedSquares.push(index);
+            }
+        }
+
+        function assignNumbers() {
+            const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            const randomNumbers = document.querySelectorAll('.random-number');
+
+            for (let i = 0; i < 2; i++) {
+                const rowNumbers = [...numbers].sort(() => Math.random() - 0.5);
+                for (let j = 0; j < 10; j++) {
+                    randomNumbers[i * 10 + j].textContent = rowNumbers[j];
+                }
+            }
+        }
+
+        function startGame() {
+            if (selectedSquares.length === 0) {
+                alert('Please select at least one square to play!');
+                return;
+            }
+
+            assignNumbers();
+
+            const halftimeHome = Math.floor(Math.random() * 50);
+            const halftimeAway = Math.floor(Math.random() * 50);
+            const finalHome = halftimeHome + Math.floor(Math.random() * 30);
+            const finalAway = halftimeAway + Math.floor(Math.random() * 30);
+
+            const halftimeWinner = (halftimeHome % 10 + halftimeAway % 10) % 10;
+            const finalWinner = (finalHome % 10 + finalAway % 10) % 10;
+
+            const squares = document.querySelectorAll('.square');
+            squares.forEach(square => square.classList.remove('winner'));
+
+            const halftimeSquare = squares[halftimeWinner];
+            const finalSquare = squares[10 + finalWinner];
+            halftimeSquare.classList.add('winner');
+            finalSquare.classList.add('winner');
+
+            const gameValue = parseInt(gameSelect.value);
+            const potValue = gameValue * 20;
+            const winAmount = (potValue * 0.45).toFixed(2);
+            const houseAmount = (potValue * 0.1).toFixed(2);
+
+            let resultText = `
+                Halftime Score: Team A ${halftimeHome} - Team B ${halftimeAway}<br>
+                Final Score: Team A ${finalHome} - Team B ${finalAway}<br><br>
+                Halftime Winner: Square #${halftimeWinner + 1} (Top Row) - $${winAmount}<br>
+                Final Winner: Square #${finalWinner + 1} (Bottom Row) - $${winAmount}<br>
+                House: $${houseAmount}
+            `;
+
+            if (selectedSquares.includes(halftimeWinner) || selectedSquares.includes(10 + finalWinner)) {
+                resultText += '<br><br>Congratulations! You won!';
+            } else {
+                resultText += '<br><br>Better luck next time!';
+            }
+
+            resultDiv.innerHTML = resultText;
+        }
+
+        createBoard();
+        startButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html>

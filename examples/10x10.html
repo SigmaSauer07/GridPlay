@@ -28,6 +28,66 @@
             text-align: center;
         }
 
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .score-box {
+            width: 70px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-size: 1.2em;
+        }
+
+        #timer {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .team-names {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .team-name {
+            width: 200px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 2em;
+            color: #00ff88;
+        }
+
+        .team-names.vertical {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .team-name.rotated {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            text-align: center;
+            font-weight: bold;
+            font-size: 2em;
+            color: #00ff88;
+        }
+        
         h1 {
             font-size: 2.5em;
             color: #00ff88;
@@ -38,7 +98,7 @@
             display: grid;
             grid-template-columns: repeat(11, 1fr);
             gap: 3px;
-            margin-top: 20px;
+            margin-top: 10px;
             max-width: 550px;
             margin-left: auto;
             margin-right: auto;
@@ -97,7 +157,8 @@
             box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
         }
 
-        #quarters, #result {
+        #quarters,
+        #result {
             text-align: center;
             font-size: 18px;
             margin-top: 20px;
@@ -105,9 +166,15 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
         .winner {
@@ -131,12 +198,23 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>GridPlay 10x10</h1>
-        <p>Select your squares and click "Start Game" to play!</p>
+        <div class="header">
+            <div class="score-box" id="away-score">0</div>
+            <h1>GridPlay 10x10</h1>
+            <div class="score-box" id="home-score">0</div>
+        </div>
+        <div id="timer">Game starts in: <span id="countdown"></span></div>
+        <div class="team-names">
+            <div class="team-name" id="home-team-name">Home Team</div>
+        </div>
         <div class="grid-container" id="grid"></div>
-        <button id="start-game">Start Game</button>
+        <div class="team-names vertical">
+            <div class="team-name rotated" id="away-team-name">Away Team</div>
+        </div>       
+        <button id="start-game">Lock In</button>
         <div id="quarters"></div>
         <div id="result"></div>
     </div>
@@ -146,7 +224,16 @@
         const startButton = document.getElementById('start-game');
         const resultDiv = document.getElementById('result');
         const quartersDiv = document.getElementById('quarters');
+        const awayScoreDisplay = document.getElementById('away-score');
+        const homeScoreDisplay = document.getElementById('home-score');
+        const timerDisplay = document.getElementById('countdown');
+        const homeTeamNameDisplay = document.getElementById('home-team-name');
+        const awayTeamNameDisplay = document.getElementById('away-team-name');
+
         let selectedSquares = [];
+        let startTime = new Date().getTime() + (10 * 60 * 1000); // 10 minutes from now
+        let timerInterval;
+        let gameStarted = false;
 
         // Create grid
         for (let i = 0; i < 121; i++) {
@@ -173,10 +260,30 @@
                 selectedSquares.push(index);
             }
         }
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = startTime - now;
+
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            timerDisplay.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (distance < 0) {
+                clearInterval(timerInterval);
+                timerDisplay.innerHTML = "Game Started!";
+                gameStarted = true;
+                startButton.disabled = false; // Enable the button
+            }
+        }
 
         startButton.addEventListener('click', startGame);
 
         function startGame() {
+            if (!gameStarted) {
+                alert('The game has not started yet!');
+                return;
+            }
             if (selectedSquares.length === 0) {
                 alert('Please select at least one square to play!');
                 return;
@@ -194,6 +301,13 @@
                 Math.floor(Math.random() * 20),
                 Math.floor(Math.random() * 20)
             ];
+
+            homeScoreDisplay.textContent = homeScores.reduce((a, b) => a + b, 0);
+            awayScoreDisplay.textContent = awayScores.reduce((a, b) => a + b, 0);
+
+            homeTeamNameDisplay.textContent = "Home Team"; // Set Home Team Name
+            awayTeamNameDisplay.textContent = "Away Team"; // Set Away Team Name
+
 
             const winningSquares = homeScores.map((homeScore, index) => {
                 const homeDigit = homeScore % 10;
@@ -227,7 +341,15 @@
             if (!userWon) {
                 resultDiv.textContent += ' - Better luck next time!';
             }
+             startButton.disabled = true; // Disable Lock In after game start
         }
+
+
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+        startButton.disabled = true; // Disable the button initially
+
     </script>
 </body>
+
 </html>

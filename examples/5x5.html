@@ -23,9 +23,69 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .score-box {
+            width: 70px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-size: 1.2em;
+        }
+
+        #timer {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .team-names {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .team-name {
+            width: 200px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 2em;
+            color: #00ff88;
+        }
+
+        .team-names.vertical {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 160px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .team-name.rotated {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            text-align: center;
+            font-weight: bold;
+            font-size: 2em;
+            color: #00ff88;
         }
 
         h1 {
@@ -96,6 +156,7 @@
             box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
         }
 
+        #quarters,
         #result {
             text-align: center;
             font-size: 20px;
@@ -132,10 +193,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>GridPlay</h1>
-        <p>Select your squares and click "Start Game" to play!</p>
+        <div class="header">
+            <div class="score-box" id="away-score">0</div>
+            <h1>GridPlay 5x5</h1>
+            <div class="score-box" id="home-score">0</div>
+        </div>
+        <div id="timer">Game starts in: <span id="countdown"></span></div>
+        <div class="team-names">
+            <div class="team-name" id="home-team-name">Home Team</div>
+        </div>
         <div class="grid-container" id="grid"></div>
-        <button id="start-game">Start Game</button>
+        <div class="team-names vertical">
+            <div class="team-name rotated" id="away-team-name">Away Team</div>
+        </div>       
+        <button id="start-game">Lock In</button>
+        <div id="quarters"></div>
         <div id="result"></div>
     </div>
 
@@ -143,7 +215,17 @@
         const grid = document.getElementById('grid');
         const startButton = document.getElementById('start-game');
         const resultDiv = document.getElementById('result');
+        const quartersDiv = document.getElementById('quarters');
+        const awayScoreDisplay = document.getElementById('away-score');
+        const homeScoreDisplay = document.getElementById('home-score');
+        const timerDisplay = document.getElementById('countdown');
+        const homeTeamNameDisplay = document.getElementById('home-team-name');
+        const awayTeamNameDisplay = document.getElementById('away-team-name');
+
         let selectedSquares = [];
+        let startTime = new Date().getTime() + (10 * 60 * 1000); // 10 minutes from now
+        let timerInterval;
+        let gameStarted = false;
 
         // Create grid
         for (let i = 0; i < 36; i++) {
@@ -170,35 +252,96 @@
                 selectedSquares.push(index);
             }
         }
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = startTime - now;
+
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            timerDisplay.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (distance < 0) {
+                clearInterval(timerInterval);
+                timerDisplay.innerHTML = "Game Started!";
+                gameStarted = true;
+                startButton.disabled = false; // Enable the button
+            }
+        }
 
         startButton.addEventListener('click', startGame);
 
         function startGame() {
+            if (!gameStarted) {
+                alert('The game has not started yet!');
+                return;
+            }
             if (selectedSquares.length === 0) {
                 alert('Please select at least one square to play!');
                 return;
             }
 
-            const homeScore = Math.floor(Math.random() * 50);
-            const awayScore = Math.floor(Math.random() * 50);
-            const homeDigit = homeScore % 5;
-            const awayDigit = awayScore % 5;
-            const winningSquare = (awayDigit * 6) + homeDigit + 7;
+            const homeScores = [
+                Math.floor(Math.random() * 20),
+                Math.floor(Math.random() * 20),
+                Math.floor(Math.random() * 20),
+                Math.floor(Math.random() * 20)
+            ];
+            const awayScores = [
+                Math.floor(Math.random() * 20),
+                Math.floor(Math.random() * 20),
+                Math.floor(Math.random() * 20),
+                Math.floor(Math.random() * 20)
+            ];
 
-            resultDiv.textContent = `Final Score: Home ${homeScore} - Away ${awayScore}`;
+            homeScoreDisplay.textContent = homeScores.reduce((a, b) => a + b, 0);
+            awayScoreDisplay.textContent = awayScores.reduce((a, b) => a + b, 0);
+
+            homeTeamNameDisplay.textContent = "Home Team"; // Set Home Team Name
+            awayTeamNameDisplay.textContent = "Away Team"; // Set Away Team Name
+
+
+            const winningSquares = homeScores.map((homeScore, index) => {
+                const homeDigit = homeScore % 10;
+                const awayDigit = awayScores[index] % 10;
+                return (awayDigit * 11) + homeDigit + 12;
+            });
+
+            quartersDiv.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const quarterDiv = document.createElement('div');
+                quarterDiv.textContent = `Q${i + 1}: Home ${homeScores[i]} - Away ${awayScores[i]}`;
+                quartersDiv.appendChild(quarterDiv);
+            }
+
+            resultDiv.textContent = 'Final Score: ' +
+                `Home ${homeScores.reduce((a, b) => a + b, 0)} - ` +
+                `Away ${awayScores.reduce((a, b) => a + b, 0)}`;
 
             const allSquares = document.querySelectorAll('.grid-item');
             allSquares.forEach(square => square.classList.remove('winner'));
 
-            if (selectedSquares.includes(winningSquare)) {
-                resultDiv.textContent += ' - You won!';
-                allSquares[winningSquare].classList.add('winner');
-            } else {
+            let userWon = false;
+            winningSquares.forEach((square, index) => {
+                if (selectedSquares.includes(square)) {
+                    userWon = true;
+                    resultDiv.textContent += ` - You won Q${index + 1}!`;
+                }
+                allSquares[square].classList.add('winner');
+            });
+
+            if (!userWon) {
                 resultDiv.textContent += ' - Better luck next time!';
             }
-
-            allSquares[winningSquare].classList.add('winner');
+             startButton.disabled = true; // Disable Lock In after game start
         }
+
+
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+        startButton.disabled = true; // Disable the button initially
+
     </script>
 </body>
+
 </html>
